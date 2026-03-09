@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if(!loggedInUser) return;
 
-        const res = await fetch(`http://localhost:3000/profile/${loggedInUser.email}`);
+        const res = await fetch(`${API}/profile/${loggedInUser.email}`);
         const data = await res.json();
 
         if(!data.success) return;
@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if(!capturedImage || !loggedInUser) return;
 
-        const res = await fetch("http://localhost:3000/updateProfilePicture",{
+        const res = await fetch("${API}/updateProfilePicture",{
 
             method:"POST",
 
@@ -352,7 +352,7 @@ async function loadAccountSettings() {
 
     try {
 
-        const res = await fetch(`http://localhost:3000/user/${loggedInUser.email}`);
+        const res = await fetch(`${API}/user/${loggedInUser.email}`);
         const data = await res.json();
 
         if (!data.success) return;
@@ -429,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
-            const res = await fetch("http://localhost:3000/updateUser", {
+            const res = await fetch("${API}/updateUser", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
