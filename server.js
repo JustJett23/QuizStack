@@ -498,5 +498,4 @@ app.get("/quizHistory/:email",(req,res)=>{
 });
 
 const PORT = process.env.PORT || 3000;
->>>>>>> b1fef7735f06c8034f0311cd1ab38b8d50fc9a04
 app.listen(PORT, ()=> console.log("Server running on http://localhost:"+PORT));
