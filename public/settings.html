@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>QuizStack</title>
+        <script src="https://kit.fontawesome.com/ab54a7aff8.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+        <link rel="stylesheet" href="style.css">
+        <title>QuizStack</title>
+        <link rel="icon" type="image/x-icon" href="img.ico">
+    </head>
+    <body>
+        <h1 class="quiz-logo">
+                <img src="img.png" alt="img" class="logo-img">
+                <span class="logo-text">uizStack</span>
+        </h1>
+
+        <div class="settings">
+            <div class="containers">
+                <div class="banner">
+                    <div class="profile-container">
+                        <div class="camera-container" id="camera-container">
+                                <video id="video" autoplay></video>
+                                <canvas id="canvas"></canvas>
+                        </div>
+                        <div class="buttons">
+                            <button id="edit-profile" class="photo-buttton">Edit Profile</button>
+                            <button id="capture" style="display: none;" class="photo-buttton">Capture Image</button>
+                            <button id="confirm" style="display: none;" class="photo-buttton">Confirm</button>
+                        </div>
+                    </div>
+
+                    <div class="return">
+                        <ol>
+                            <li>
+                                <span class="tooltip">
+                                    <a href="Dashboard.html" >
+                                        <button class="icons" id="settings-button">
+                                            <i class="fa-solid fa-angle-left"></i>
+                                        </button>
+                                    </a>
+                                    <span class="tooltiptext">Return</span>
+                                <span>  
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="setting active account" id="account-settings">
+                    <ol>
+                        <li>
+                            <h1><span style="color:#ff9800; margin-left: 15px;">Account</span> Settings</h1>
+                        </li>
+
+                        <li>
+                            <section>
+                                <div class="field account">
+                                    <label>First Name:</label>
+                                    <input type="text" id="first-name" disabled pattern="^[A-Za-z\s]*$" title="Please enter letters only.">
+                                </div>
+
+                                <div class="field account">
+                                    <label>Middle Name:</label>
+                                    <input type="text" id="middle-name" disabled pattern="^[A-Za-z\s]*$" title="Please enter letters only.">
+                                </div>
+
+                                <div class="field account">
+                                    <label>Last Name:</label>
+                                    <input type="text" id="last-name" disabled pattern="^[A-Za-z\s]*$" title="Please enter letters only.">
+                                </div>
+                            </section>
+                        </li>
+
+                        <li>
+                            <section>
+                                <div class="field account">
+                                    <label>Email: </label>
+                                    <input type="email" id="emailAdd" disabled pattern="^(136863120199|\d{12})@ncr1\.deped\.gov\.ph$" title="Please enter an email in the format (LRN)@ncr1.deped.gov.ph">
+                                </div> 
+                            </section>
+                        </li>
+
+                        <li>
+                            <button id="edit-btn" class="edit-btn" type="submit">Edit ✎</button>
+                            <button id="save-btn" class="save-btn" style="display:none;">Save</button>
+                        </li>
+                    </ol>
+                </div>
+        </div>
+
+        <div class="white-curve-left"></div>
+        <div class="white-curve-right"></div>        
+        <script src="script.js"></script>
+    </body>
+</html>
