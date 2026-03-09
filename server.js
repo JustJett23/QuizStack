@@ -212,5 +212,45 @@ app.get("/quizHistory/:email",(req,res)=>{
     });
 });
 
+app.get("/admin/users", (req, res) => {
+    db.all(
+        `SELECT id, firstname, middlename, lastname, email FROM accounts`,
+        [],
+        (err, rows) => {
+            if (err) {
+                return res.send("Database error");
+            }
+
+            let html = `
+            <h1>Registered Users</h1>
+            <table border="1" cellpadding="10">
+            <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Middle Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+            </tr>
+            `;
+
+            rows.forEach(user => {
+                html += `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.firstname}</td>
+                    <td>${user.middlename}</td>
+                    <td>${user.lastname}</td>
+                    <td>${user.email}</td>
+                </tr>
+                `;
+            });
+
+            html += "</table>";
+
+            res.send(html);
+        }
+    );
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, ()=> console.log("Server running on http://localhost:"+PORT));
