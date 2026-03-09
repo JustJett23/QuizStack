@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/ab54a7aff8.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <title>QuizStack</title>
+    <link rel="icon" type="image/x-icon" href="img.ico">
+</head>
+<body>
+    <div class="phone">
+        <div class="login container grid" id="loginAccessRegister">
+            <h1 class="quiz-logo">
+                <img src="img.png" alt="img" class="logo-img">
+                <span class="logo-text">uizStack</span>
+            </h1>            
+            <div class="login container grid" id="loginAccessRegister">
+            
+            <div class="login__access grid">     
+                <div class="login__area">
+                    <h1 class="login__title">Log-in</h1>
+                    <form class="login__form" id="login__form" onsubmit="handleLogin(event)">
+                        <div class="login__content grid" id="loginForm">
+                            <div class="login__box">
+                                <input type="email" id="Loginemail2" required placeholder=" " class="login__input">
+                                <label for="Loginemail2" class="login__label">Email</label>
+                                <i class="login__icon fa-solid fa-envelope"></i>
+                            </div>
+                            <div class="login__box">
+                                <input type="password" id="Loginpassword" required placeholder=" " class="login__input">
+                                <label for="Loginpassword" class="login__label">Password</label>
+                                <span toggle="#password-field" class="fa fa-fw fa-eye field_icon toggle-password login__password"></span>
+                            </div>
+                        </div>
+                        <br><br>
+                        <button type="submit" class="login__button" id="loginButton">Login</button>
+                    </form>
+                    <p class="login__switch">
+                        Don't have an account?
+                        <button id='loginButtonRegister' onclick="Register()">Create Account</button>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="login__register grid"> 
+                    <div class="login__area">
+                        <h1 class="login__title">Create new account.</h1>
+                        <form class="login__form" id="createAccount" onsubmit="handleCreateAccount(event)">
+                            <div class="login__content grid" id="createAccountForm">
+                                <div class="login__group grid" id="input-container">
+                                    <div class="login__box">
+                                        <input type="text" id="firstname" required placeholder=" " class="login__input" pattern="^[A-Za-z\s]*$" title="Please enter letters only.">
+                                        <label for="firstname" class="login__label">First Name</label>
+                                    </div>
+                                    
+                                    <div class="login__box">
+                                        <input type="text" id="middlename" placeholder=" " class="login__input" pattern="^[A-Za-z\s]*$" title="Please enter letters only.">
+                                        <label for="middlename" class="login__label">Middle Name</label>
+                                        
+                                    </div>
+                                    <div class="login__box">
+                                        <input type="text" id="lastname" required placeholder=" " class="login__input" pattern="^[A-Za-z\s]*$" title="Please enter letters only.">
+                                        <label for="lastname" class="login__label">Last Name</label>                                                                           </div>
+                                </div>
+                                <div class="login__group2 grid">
+                                    <div class="login__box">
+                                            <input type="email" size="30" id="email" required placeholder=" " class="login__input">
+                                            <label for="email" class="login__label">Email</label>
+                                            
+                                            <i class="fa-solid fa-envelope login__icon"></i>
+                                    </div>
+                                </div>
+                                    <div class="login__box">
+                                        <input type="password" id="passwordCreate" required placeholder=" " class="login__input password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" title="The password must be a minimum of 6 characters and should contain at least one upper-case letter and one number">
+                                        <label for="passwordCreate" class="login__label">Password</label>
+
+                                        <span toggle="#password-field" class="fa fa-fw fa-eye field_icon toggle-password login__password" id="loginPasswordCreate"></span>
+                                    </div>
+                                
+                            </div>
+                            <a href="loginForm.html" id="createAccountRedirectLink">
+                            <button class="Create__button" id="createButton">Create Account</button>
+                            </a>
+                        </form>
+                        <p class="login__switch">
+                            Already have an account?
+                            <button id="loginButtonAccess" onclick="Register()">Log In</button>
+                        </p>
+                        
+                    </div>
+                
+            </div>
+        </div>
+
+
+
+
+    <div class="white-curve"></div>
+
+    <!-- form fields go here -->
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

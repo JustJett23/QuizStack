@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Ignore Node.js modules folder
 node_modules/
 
@@ -11,4 +12,19 @@ node_modules/
 .env
 
 # Ignore macOS metadata files (if you ever share on Mac)
+=======
+# Ignore Node.js modules folder
+node_modules/
+
+# Ignore Visual Studio Code settings folder
+.vscode/
+
+# Ignore log files
+*.log
+
+# Ignore environment variable files
+.env
+
+# Ignore macOS metadata files (if you ever share on Mac)
+>>>>>>> b1fef7735f06c8034f0311cd1ab38b8d50fc9a04
 .DS_Store
