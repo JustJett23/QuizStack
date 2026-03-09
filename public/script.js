@@ -1,3 +1,5 @@
+const API = window.location.origin;
+
 (function() {
     const sparkleContainer = document.createElement("div");
     sparkleContainer.id = "sparkle-container";
@@ -79,7 +81,7 @@ function handleLogin(event) {
     let loginEmail = document.getElementById('Loginemail2').value;
     let loginPassword = document.getElementById('Loginpassword').value;
 
-    fetch("http://localhost:3000/login", {
+    (fetch(`${API}/login`), {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -125,7 +127,7 @@ function handleCreateAccount(event) {
     let surname = document.getElementById('lastname').value;
     let middleName = document.getElementById('middlename').value;
 
-    fetch("http://localhost:3000/register", {
+    (fetch(`${API}/register`), {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
