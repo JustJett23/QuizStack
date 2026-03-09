@@ -1,0 +1,14 @@
+# Ignore Node.js modules folder
+node_modules/
+
+# Ignore Visual Studio Code settings folder
+.vscode/
+
+# Ignore log files
+*.log
+
+# Ignore environment variable files
+.env
+
+# Ignore macOS metadata files (if you ever share on Mac)
+.DS_Store

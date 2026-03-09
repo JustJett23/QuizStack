@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://kit.fontawesome.com/ab54a7aff8.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+        <link rel="stylesheet" href="style.css">
+        <title>QuizStack</title>
+        <link rel="icon" type="image/x-icon" href="img.ico">
+    </head>
+    <body>
+        <h1 class="quiz-logo">
+                <img src="img.png" alt="img" class="logo-img">
+                <span class="logo-text">uizStack</span>
+        </h1>
+
+        <div class="quiz-ui">
+
+            <!-- DIFFICULTY -->
+            <div class="screen difficulty active">
+                <div class="card">
+                    <h3 class="title ribbon">DIFFICULTY</h3>
+
+                    <button class="diff-btn" data-mode="easy">EASY</button>
+                    <button class="diff-btn" data-mode="medium">MEDIUM</button>
+                    <button class="diff-btn" data-mode="hard">HARD</button>
+
+                    <div class="home-button" id="homeDifficulty">
+                        <button class="diff-btn">Home</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEVEL SELECTION -->
+            <div class="screen levels">
+                <div class="card">
+                    <h3 class="title ribbon">LEVEL SELECTION</h3>
+
+                    <div class="level-grid"></div>
+
+                    <div class="back-button" id="backLevel">
+                        <button id="diff-btn">Back</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUESTION -->
+            <div class="screen question">
+                <div class="card">
+                    <h3 id="questionText" class="ribbon"></h3>
+                    <div class="choices"></div>
+                </div>
+            </div>
+
+            <div id="scoreModal" class="modal" style="display:none;">
+                <div class="modal-content score-card">
+
+                    <h2 class="score-title ribbon">Score</h2>
+
+                    <div class="score-circle">
+                        <span id="scoreNumber">10</span>
+                    </div>
+
+                    <div class="score-greet">
+                        <p id="scoreText"></p>
+                    </div>
+
+                    <div class="score-buttons">
+                        <button id="scoreHomeBtn">Home</button>
+                        <button id="scoreRetryBtn">Retry</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="white-curve-left"></div>
+        <div class="white-curve-right"></div>
+        <script src="script.js"></script>
+    </body>
+</html>
+
