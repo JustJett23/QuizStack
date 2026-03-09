@@ -81,7 +81,7 @@ function handleLogin(event) {
     let loginEmail = document.getElementById('Loginemail2').value;
     let loginPassword = document.getElementById('Loginpassword').value;
 
-    fetch(`${API}/login`), {
+    fetch(`${API}/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -127,7 +127,7 @@ function handleCreateAccount(event) {
     let surname = document.getElementById('lastname').value;
     let middleName = document.getElementById('middlename').value;
 
-    fetch(`${API}/register`), {
+    fetch(`${API}/register`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
