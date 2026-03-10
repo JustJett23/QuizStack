@@ -357,47 +357,74 @@ app.get("/quizHistory/:email", (req, res) => {
 /* ADMIN USERS */
 
 app.get("/admin/users", (req, res) => {
+    // Get all accounts first
+    db.all(`SELECT * FROM accounts`, [], (err, accounts) => {
+        if (err) return res.send("Database error: " + err.message);
 
-    db.all(
-        `SELECT id,firstname,middlename,lastname,email FROM accounts`,
-        [],
-        (err, rows) => {
+        let html = `<h1>Registered Users</h1>`;
 
-            if (err) return res.send("Database error");
+        // Loop through accounts to get their levels and quiz history
+        const accountPromises = accounts.map(user => {
+            return new Promise((resolve) => {
+                // Get unlocked levels for this user
+                db.all(
+                    `SELECT mode, level FROM unlockedLevels WHERE accountId=?`,
+                    [user.id],
+                    (errLevels, levels) => {
+                        if (errLevels) levels = [];
 
-            let html = `
-            <h1>Registered Users</h1>
-            <table border="1" cellpadding="10">
-            <tr>
-            <th>ID</th>
-            <th>First Name</th>
-            <th>Middle</th>
-            <th>Last</th>
-            <th>Email</th>
-            </tr>
-            `;
+                        // Get quiz history for this user
+                        db.all(
+                            `SELECT mode, level, score, date, answer FROM quizHistory WHERE accountId=? ORDER BY id DESC`,
+                            [user.id],
+                            (errQuiz, quiz) => {
+                                if (errQuiz) quiz = [];
 
-            rows.forEach(user => {
+                                resolve({
+                                    user,
+                                    levels,
+                                    quiz
+                                });
+                            }
+                        );
+                    }
+                );
+            });
+        });
 
+        // Wait for all promises to complete
+        Promise.all(accountPromises).then(results => {
+            results.forEach(data => {
+                const user = data.user;
                 html += `
-                <tr>
-                <td>${user.id}</td>
-                <td>${user.firstname}</td>
-                <td>${user.middlename || ""}</td>
-                <td>${user.lastname}</td>
-                <td>${user.email}</td>
-                </tr>
+                    <h2>${user.firstname} ${user.middlename || ""} ${user.lastname} (ID: ${user.id})</h2>
+                    <p>Email: ${user.email}</p>
+                    <h3>Unlocked Levels</h3>
+                    <table border="1" cellpadding="5">
+                        <tr>
+                            <th>Mode</th>
+                            <th>Level</th>
+                        </tr>
+                        ${data.levels.map(lv => `<tr><td>${lv.mode}</td><td>${lv.level}</td></tr>`).join('')}
+                    </table>
+                    <h3>Quiz History</h3>
+                    <table border="1" cellpadding="5">
+                        <tr>
+                            <th>Mode</th>
+                            <th>Level</th>
+                            <th>Score</th>
+                            <th>Date</th>
+                            <th>Answer</th>
+                        </tr>
+                        ${data.quiz.map(q => `<tr><td>${q.mode}</td><td>${q.level}</td><td>${q.score}</td><td>${q.date}</td><td>${q.answer}</td></tr>`).join('')}
+                    </table>
+                    <hr>
                 `;
-
             });
 
-            html += "</table>";
-
             res.send(html);
-
-        }
-    );
-
+        });
+    });
 });
 
 /* SERVER */
