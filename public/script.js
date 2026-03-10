@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if(!capturedImage || !loggedInUser) return;
 
-        const res = await fetch("${API}/updateProfilePicture",{
+        const res = await fetch("/updateProfilePicture",{
 
             method:"POST",
 
