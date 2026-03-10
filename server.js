@@ -506,6 +506,106 @@ app.get("/admin/users", (req, res) => {
     });
 });
 
+/* ===========================
+   ADMIN CRUD ROUTES
+   =========================== */
+
+/* --- ACCOUNTS --- */
+
+/* Update user */
+app.post("/admin/updateUser", (req, res) => {
+    const { oldEmail, firstName, middleName, surname, email } = req.body;
+
+    db.run(
+        `UPDATE accounts 
+         SET firstname=?, middlename=?, lastname=?, email=? 
+         WHERE email=?`,
+        [firstName, middleName, surname, email, oldEmail],
+        (err) => {
+            if (err) return res.json({ success: false, message: err.message });
+            res.json({ success: true });
+        }
+    );
+});
+
+/* Delete user */
+app.post("/admin/deleteUser", (req, res) => {
+    const { email } = req.body;
+
+    db.run(
+        `DELETE FROM accounts WHERE email=?`,
+        [email],
+        function (err) {
+            if (err) return res.json({ success: false, message: err.message });
+            res.json({ success: true });
+        }
+    );
+});
+
+/* --- UNLOCKED LEVELS --- */
+
+/* Update unlocked level */
+app.post("/admin/updateLevel", (req, res) => {
+    const { id, mode, level } = req.body;
+
+    db.run(
+        `UPDATE unlockedLevels 
+         SET mode=?, level=? 
+         WHERE id=?`,
+        [mode, level, id],
+        (err) => {
+            if (err) return res.json({ success: false, message: err.message });
+            res.json({ success: true });
+        }
+    );
+});
+
+/* Delete unlocked level */
+app.post("/admin/deleteLevel", (req, res) => {
+    const { id } = req.body;
+
+    db.run(
+        `DELETE FROM unlockedLevels WHERE id=?`,
+        [id],
+        (err) => {
+            if (err) return res.json({ success: false, message: err.message });
+            res.json({ success: true });
+        }
+    );
+});
+
+/* --- QUIZ HISTORY --- */
+
+/* Update quiz history */
+app.post("/admin/updateQuiz", (req, res) => {
+    const { id, mode, level, score, date, answer } = req.body;
+
+    db.run(
+        `UPDATE quizHistory 
+         SET mode=?, level=?, score=?, date=?, answer=? 
+         WHERE id=?`,
+        [mode, level, score, date, answer, id],
+        (err) => {
+            if (err) return res.json({ success: false, message: err.message });
+            res.json({ success: true });
+        }
+    );
+});
+
+/* Delete quiz history */
+app.post("/admin/deleteQuiz", (req, res) => {
+    const { id } = req.body;
+
+    db.run(
+        `DELETE FROM quizHistory WHERE id=?`,
+        [id],
+        (err) => {
+            if (err) return res.json({ success: false, message: err.message });
+            res.json({ success: true });
+        }
+    );
+});
+
 /* SERVER */
 
 const PORT = process.env.PORT || 3000;
