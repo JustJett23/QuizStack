@@ -59,7 +59,6 @@
 body {
     margin: 0;
     background: #4A70A9;
-    overflow-x: hidden;
     overflow: hidden;
 }
 
@@ -72,8 +71,6 @@ body {
     border: none;
     font-weight: bold;
     font-family: 'Times New Roman', Times, serif;
-    overflow-x: hidden;
-    overflow: hidden;
 }
 
 .sparkle {
@@ -592,13 +589,41 @@ body {
     
 }
 
+.tooltiptext {
+    visibility: hidden;
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0.5rem 0.8rem rgba(0,0,0,0.2);
+    border-radius: .6rem;
+    padding: .4rem 1.2rem;
+    background-color: #F5EFE6;
+    color: #12171e;
+    opacity: 0;
+    z-index: 9999;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+ol li:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+    display: flex;
+}
+
+.footer.tilt ol li .tooltiptext,
+.play.tilt ol li .tooltiptext,
+.return.tilt ol li .tooltiptext{
+    display: none;
+}
 
 .footer ol li .tooltiptext {
     visibility: hidden;
     position: absolute;
-    bottom: 90%; /* Moves tooltip ABOVE the icon */
+    bottom: 120%; /* Moves tooltip ABOVE the icon */
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     box-shadow: 0 0.5rem 0.8rem rgba(0, 0, 0, 0.2);
     border-radius: .6rem;
     padding: .4rem 1.2rem;
@@ -633,6 +658,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     z-index: 999;
+    overflow: visible;
 }
 
 .footer ol {
@@ -646,6 +672,7 @@ body {
 
 .footer ol li {
     position: relative;   /* Needed for correct tooltip position */
+    overflow: visible;
 }
 
 
@@ -660,9 +687,9 @@ button {
 .play ol li .tooltiptext {
     visibility: hidden;
     position: absolute;
-    bottom: 90%; /* Moves tooltip ABOVE the icon */
+    bottom: 120%; /* Moves tooltip ABOVE the icon */
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     box-shadow: 0 0.5rem 0.8rem rgba(0, 0, 0, 0.2);
     border-radius: .6rem;
     padding: .4rem 1.2rem;
@@ -682,9 +709,8 @@ button {
 }
 
 .play i {
-    font-size: clamp(40px, 12vw, 70px); /* scales with screen size */
-    border-width: clamp(1rem, 3vw, 3rem);
-    gap: 10px;
+    font-size: clamp(40px,12vw,70px);
+    border-width: clamp(1rem,3vw,3rem);
     background-color: #F5EFE6;
     border: #F5EFE6 3rem solid;
     border-radius: 100%;
@@ -697,6 +723,7 @@ button {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1;
+    overflow: visible;
 }
 
 .play ol {
@@ -709,14 +736,15 @@ button {
 
 .play ol li {
     position: relative;   /* Needed for correct tooltip position */
+    overflow: visible;
 }
 
 .return ol li .tooltiptext {
     visibility: hidden;
     position: absolute;
-    bottom: 90%; /* Moves tooltip ABOVE the icon */
+    bottom: 120%; /* Moves tooltip ABOVE the icon */
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     box-shadow: 0 0.5rem 0.8rem rgba(0, 0, 0, 0.2);
     border-radius: .6rem;
     padding: .4rem 1.2rem;
@@ -737,7 +765,6 @@ button {
 
 .return i {
     font-size: 30px;
-    gap: 10px;
     background-color: #F5EFE6;
     border: #F5EFE6 1rem solid;
     border-radius: 100%;
@@ -762,6 +789,7 @@ button {
 
 .return ol li {
     position: relative;   /* Needed for correct tooltip position */
+    overflow: visible;
 }
 
 .containers {
