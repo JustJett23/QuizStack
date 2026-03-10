@@ -375,11 +375,6 @@ app.get("/admin/users", (req, res) => {
         });
     });
 });
-
-/* =====================
-   ADMIN CRUD ROUTES
-   ===================== */
-
 /* --- ACCOUNTS --- */
 app.post("/admin/updateUser", (req, res) => {
     const { oldEmail, firstName, middleName, surname, email } = req.body;
@@ -387,9 +382,8 @@ app.post("/admin/updateUser", (req, res) => {
         `UPDATE accounts SET firstname=?, middlename=?, lastname=?, email=? WHERE email=?`,
         [firstName, middleName, surname, email, oldEmail],
         function(err) {
-            if (err) return res.json({ success: false, message: err.message });
-            if (this.changes === 0) return res.json({ success: false, message: "No rows updated" });
-            res.json({ success: true });
+            if (err) return res.send("Error: " + err.message);
+            res.redirect("/admin/users"); // Redirect back to admin page
         }
     );
 });
@@ -397,8 +391,8 @@ app.post("/admin/updateUser", (req, res) => {
 app.post("/admin/deleteUser", (req, res) => {
     const { email } = req.body;
     db.run(`DELETE FROM accounts WHERE email=?`, [email], function(err) {
-        if (err) return res.json({ success: false, message: err.message });
-        res.json({ success: true });
+        if (err) return res.send("Error: " + err.message);
+        res.redirect("/admin/users"); // Redirect back to admin page
     });
 });
 
@@ -406,17 +400,16 @@ app.post("/admin/deleteUser", (req, res) => {
 app.post("/admin/updateLevel", (req, res) => {
     const { id, mode, level } = req.body;
     db.run(`UPDATE unlockedLevels SET mode=?, level=? WHERE id=?`, [mode, level, id], function(err) {
-        if (err) return res.json({ success: false, message: err.message });
-        if (this.changes === 0) return res.json({ success: false, message: "No rows updated" });
-        res.json({ success: true });
+        if (err) return res.send("Error: " + err.message);
+        res.redirect("/admin/users");
     });
 });
 
 app.post("/admin/deleteLevel", (req, res) => {
     const { id } = req.body;
     db.run(`DELETE FROM unlockedLevels WHERE id=?`, [id], function(err) {
-        if (err) return res.json({ success: false, message: err.message });
-        res.json({ success: true });
+        if (err) return res.send("Error: " + err.message);
+        res.redirect("/admin/users");
     });
 });
 
@@ -427,9 +420,8 @@ app.post("/admin/updateQuiz", (req, res) => {
         `UPDATE quizHistory SET mode=?, level=?, score=?, date=?, answer=? WHERE id=?`,
         [mode, level, score, date, answer, id],
         function(err) {
-            if (err) return res.json({ success: false, message: err.message });
-            if (this.changes === 0) return res.json({ success: false, message: "No rows updated" });
-            res.json({ success: true });
+            if (err) return res.send("Error: " + err.message);
+            res.redirect("/admin/users");
         }
     );
 });
@@ -437,11 +429,10 @@ app.post("/admin/updateQuiz", (req, res) => {
 app.post("/admin/deleteQuiz", (req, res) => {
     const { id } = req.body;
     db.run(`DELETE FROM quizHistory WHERE id=?`, [id], function(err) {
-        if (err) return res.json({ success: false, message: err.message });
-        res.json({ success: true });
+        if (err) return res.send("Error: " + err.message);
+        res.redirect("/admin/users");
     });
 });
-
 /* =====================
    SERVER
    ===================== */
