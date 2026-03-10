@@ -6,18 +6,25 @@ const path = require('path');
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ limit: '20mb', extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+/* DATABASE */
+
 const dbPath = path.join(__dirname, 'quizstack.db');
+
 const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) console.error("DB Error:", err);
-    else console.log("Connected to SQLite:", dbPath);
+    if (err) {
+        console.error("DB Error:", err);
+    } else {
+        console.log("Connected to SQLite:", dbPath);
+    }
 });
 
 db.serialize(() => {
+
     db.run(`CREATE TABLE IF NOT EXISTS accounts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         firstname TEXT,
@@ -32,7 +39,8 @@ db.serialize(() => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         accountId INTEGER,
         mode TEXT,
-        level INTEGER
+        level INTEGER,
+        UNIQUE(accountId,mode,level)
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS quizHistory (
@@ -44,213 +52,358 @@ db.serialize(() => {
         date TEXT,
         answer TEXT
     )`);
+
 });
 
-app.post("/register", (req,res)=>{
-    const {firstName,middleName,surname,email,password} = req.body;
-    if(!email || !password || !firstName || !surname){
-        return res.json({success:false, message:"All fields required"});
+/* REGISTER */
+
+app.post("/register", (req, res) => {
+
+    const { firstName, middleName, surname, email, password } = req.body;
+
+    if (!firstName || !surname || !email || !password) {
+        return res.json({ success: false, message: "All fields required" });
     }
 
     db.run(
         `INSERT INTO accounts (firstname,middlename,lastname,email,password)
          VALUES (?,?,?,?,?)`,
-        [firstName,middleName,surname,email,password],
-        function(err){
-            if(err){
+        [firstName, middleName, surname, email, password],
+        function (err) {
+
+            if (err) {
                 console.error("Register error:", err);
-                return res.json({success:false, message:"Email already exists"});
+                return res.json({ success: false, message: "Email already exists" });
             }
 
-            db.run(`INSERT INTO unlockedLevels (accountId,mode,level) VALUES (?,?,?)`,
-                [this.lastID,"easy",1],
-                (err2)=> { if(err2) console.error(err2); }
+            db.run(
+                `INSERT INTO unlockedLevels (accountId,mode,level)
+                 VALUES (?,?,?)`,
+                [this.lastID, "easy", 1]
             );
 
-            res.json({success:true, userId:this.lastID});
+            res.json({ success: true, userId: this.lastID });
+
         }
     );
+
 });
 
-app.post("/login",(req,res)=>{
-    const {email,password} = req.body;
-    db.get(`SELECT * FROM accounts WHERE email=? AND password=?`, [email,password], (err,row)=>{
-        if(err){
-            console.error("Login error:", err);
-            return res.json({success:false, message:"Database error"});
-        }
-        if(!row) return res.json({success:false, message:"Invalid email or password"});
-        res.json({success:true, user:row});
-    });
-});
+/* LOGIN */
 
-app.get("/user/:email",(req,res)=>{
-    const email = req.params.email;
-    db.get(`SELECT firstname,middlename,lastname,email FROM accounts WHERE email=?`, [email], (err,row)=>{
-        if(err) return res.json({success:false});
-        if(!row) return res.json({success:false, message:"User not found"});
-        res.json({
-            success:true,
-            user:{
-                firstName:row.firstname,
-                middleName:row.middlename,
-                surname:row.lastname,
-                email:row.email
+app.post("/login", (req, res) => {
+
+    const { email, password } = req.body;
+
+    db.get(
+        `SELECT * FROM accounts WHERE email=? AND password=?`,
+        [email, password],
+        (err, row) => {
+
+            if (err) {
+                console.error("Login error:", err);
+                return res.json({ success: false });
             }
-        });
-    });
-});
 
-app.post("/updateUser",(req,res)=>{
-    const {oldEmail,firstName,middleName,surname,email} = req.body;
-    db.run(
-        `UPDATE accounts SET firstname=?,middlename=?,lastname=?,email=? WHERE email=?`,
-        [firstName,middleName,surname,email,oldEmail],
-        (err)=>{
-            if(err) return res.json({success:false});
-            res.json({success:true});
+            if (!row) {
+                return res.json({ success: false, message: "Invalid email or password" });
+            }
+
+            res.json({ success: true, user: row });
+
         }
     );
+
 });
 
-app.get("/profile/:email",(req,res)=>{
+/* GET USER INFO */
+
+app.get("/user/:email", (req, res) => {
+
     const email = req.params.email;
-    db.get(`SELECT profilePicture FROM accounts WHERE email=?`, [email], (err,row)=>{
-        if(err || !row) return res.json({success:false});
-        res.json({success:true, image:row.profilePicture});
-    });
-});
 
-app.post("/updateProfilePicture",(req,res)=>{
-    const {email,image} = req.body;
-    db.run(`UPDATE accounts SET profilePicture=? WHERE email=?`, [image,email], (err)=>{
-        if(err) return res.json({success:false});
-        res.json({success:true});
-    });
-});
+    db.get(
+        `SELECT firstname,middlename,lastname,email
+         FROM accounts WHERE email=?`,
+        [email],
+        (err, row) => {
 
-app.get("/userLevels/:email/:mode",(req,res)=>{
-    const email = req.params.email;
-    const mode = req.params.mode;
+            if (err || !row) {
+                return res.json({ success: false });
+            }
 
-    db.get(`SELECT id FROM accounts WHERE email=?`, [email], (err,row)=>{
-        if(err || !row) return res.json({success:false});
-        const accountId = row.id;
-
-        db.all(`SELECT level FROM unlockedLevels WHERE accountId=? AND mode=?`, [accountId,mode], (err2,rows)=>{
-            if(err2) return res.json({success:false});
-            const levels = rows.map(r=>r.level);
-            res.json({success:true, levels});
-        });
-    });
-});
-
-app.post("/unlockLevel",(req,res)=>{
-    const {email,mode,level} = req.body;
-    db.get(`SELECT id FROM accounts WHERE email=?`, [email], (err,row)=>{
-        if(err || !row) return res.json({success:false});
-        const accountId = row.id;
-
-        db.get(`SELECT * FROM unlockedLevels WHERE accountId=? AND mode=? AND level=?`, [accountId,mode,level], (err2,row2)=>{
-            if(err2) return res.json({success:false});
-            if(row2) return res.json({success:true});
-
-            db.run(`INSERT INTO unlockedLevels (accountId,mode,level) VALUES (?,?,?)`, [accountId,mode,level], (err3)=>{
-                if(err3) return res.json({success:false});
-                res.json({success:true});
+            res.json({
+                success: true,
+                user: {
+                    firstName: row.firstname,
+                    middleName: row.middlename,
+                    surname: row.lastname,
+                    email: row.email
+                }
             });
-        });
-    });
+
+        }
+    );
+
 });
 
-app.post("/saveAnswer",(req,res)=>{
-    const {email,mode,level,answer,correct} = req.body;
-    db.get(`SELECT id FROM accounts WHERE email=?`, [email], (err,row)=>{
-        if(err || !row) return res.json({success:false});
+/* UPDATE USER */
+
+app.post("/updateUser", (req, res) => {
+
+    const { oldEmail, firstName, middleName, surname, email } = req.body;
+
+    db.run(
+        `UPDATE accounts
+         SET firstname=?, middlename=?, lastname=?, email=?
+         WHERE email=?`,
+        [firstName, middleName, surname, email, oldEmail],
+        function (err) {
+
+            if (err) {
+                console.error("Update user error:", err);
+                return res.json({ success: false });
+            }
+
+            res.json({ success: true });
+
+        }
+    );
+
+});
+
+/* PROFILE IMAGE */
+
+app.get("/profile/:email", (req, res) => {
+
+    const email = req.params.email;
+
+    db.get(
+        `SELECT profilePicture FROM accounts WHERE email=?`,
+        [email],
+        (err, row) => {
+
+            if (err || !row) {
+                return res.json({ success: false });
+            }
+
+            res.json({
+                success: true,
+                image: row.profilePicture || null
+            });
+
+        }
+    );
+
+});
+
+app.post("/updateProfilePicture", (req, res) => {
+
+    const { email, image } = req.body;
+
+    if (!email || !image) {
+        return res.json({ success: false, message: "Missing email or image" });
+    }
+
+    db.run(
+        `UPDATE accounts SET profilePicture=? WHERE email=?`,
+        [image, email],
+        function (err) {
+
+            if (err) {
+                console.error("Profile update error:", err);
+                return res.json({ success: false });
+            }
+
+            if (this.changes === 0) {
+                return res.json({ success: false, message: "User not found" });
+            }
+
+            res.json({ success: true });
+
+        }
+    );
+
+});
+
+/* USER LEVELS */
+
+app.get("/userLevels/:email/:mode", (req, res) => {
+
+    const { email, mode } = req.params;
+
+    db.get(`SELECT id FROM accounts WHERE email=?`, [email], (err, row) => {
+
+        if (err || !row) return res.json({ success: false });
+
+        const accountId = row.id;
+
+        db.all(
+            `SELECT level FROM unlockedLevels
+             WHERE accountId=? AND mode=?`,
+            [accountId, mode],
+            (err2, rows) => {
+
+                if (err2) return res.json({ success: false });
+
+                const levels = rows.map(r => r.level);
+
+                res.json({ success: true, levels });
+
+            }
+        );
+
+    });
+
+});
+
+/* UNLOCK LEVEL */
+
+app.post("/unlockLevel", (req, res) => {
+
+    const { email, mode, level } = req.body;
+
+    db.get(`SELECT id FROM accounts WHERE email=?`, [email], (err, row) => {
+
+        if (err || !row) return res.json({ success: false });
+
         const accountId = row.id;
 
         db.run(
-            `INSERT INTO quizHistory (accountId,mode,level,score,date,answer) VALUES (?,?,?,?,?,?)`,
-            [accountId,mode,level,correct?"Correct":"Incorrect",new Date().toLocaleString(),answer],
-            (err2)=>{
-                if(err2) return res.json({success:false});
+            `INSERT OR IGNORE INTO unlockedLevels (accountId,mode,level)
+             VALUES (?,?,?)`,
+            [accountId, mode, level],
+            (err2) => {
 
-                const nextDifficultyMap = { easy: "medium", medium: "hard" };
-                const totalLevelsMap = { easy: 20, medium: 20 };
+                if (err2) return res.json({ success: false });
 
-                if(nextDifficultyMap[mode]){
-                    const nextMode = nextDifficultyMap[mode];
-                    const totalLevels = totalLevelsMap[mode];
+                res.json({ success: true });
 
-                    db.all(`SELECT DISTINCT level FROM unlockedLevels WHERE accountId=? AND mode=?`, [accountId,mode], (err3, rows)=>{
-                        if(!err3 && rows.length >= totalLevels){
-                            db.get(`SELECT * FROM unlockedLevels WHERE accountId=? AND mode=? AND level=1`, [accountId,nextMode], (err4,row4)=>{
-                                if(!row4){
-                                    db.run(`INSERT INTO unlockedLevels (accountId,mode,level) VALUES (?,?,?)`, [accountId,nextMode,1]);
-                                }
-                            });
-                        }
-                    });
-                }
-
-                res.json({success:true});
             }
         );
+
     });
+
 });
 
-app.get("/quizHistory/:email",(req,res)=>{
-    const email = req.params.email;
-    db.get(`SELECT id FROM accounts WHERE email=?`, [email], (err,row)=>{
-        if(err || !row) return res.json({success:false});
+/* SAVE ANSWERS */
+
+app.post("/saveAnswer", (req, res) => {
+
+    const { email, mode, level, answer, correct } = req.body;
+
+    db.get(`SELECT id FROM accounts WHERE email=?`, [email], (err, row) => {
+
+        if (err || !row) return res.json({ success: false });
+
         const accountId = row.id;
 
-        db.all(`SELECT mode,level,score,date FROM quizHistory WHERE accountId=?`, [accountId], (err2,rows)=>{
-            if(err2) return res.json({success:false});
-            res.json({success:true, history:rows});
-        });
+        db.run(
+            `INSERT INTO quizHistory
+            (accountId,mode,level,score,date,answer)
+            VALUES (?,?,?,?,?,?)`,
+            [
+                accountId,
+                mode,
+                level,
+                correct ? "Correct" : "Incorrect",
+                new Date().toLocaleString(),
+                answer
+            ],
+            (err2) => {
+
+                if (err2) return res.json({ success: false });
+
+                res.json({ success: true });
+
+            }
+        );
+
     });
+
 });
 
+/* QUIZ HISTORY */
+
+app.get("/quizHistory/:email", (req, res) => {
+
+    const email = req.params.email;
+
+    db.get(`SELECT id FROM accounts WHERE email=?`, [email], (err, row) => {
+
+        if (err || !row) return res.json({ success: false });
+
+        const accountId = row.id;
+
+        db.all(
+            `SELECT mode,level,score,date
+             FROM quizHistory
+             WHERE accountId=?
+             ORDER BY id DESC`,
+            [accountId],
+            (err2, rows) => {
+
+                if (err2) return res.json({ success: false });
+
+                res.json({ success: true, history: rows });
+
+            }
+        );
+
+    });
+
+});
+
+/* ADMIN USERS */
+
 app.get("/admin/users", (req, res) => {
+
     db.all(
-        `SELECT id, firstname, middlename, lastname, email FROM accounts`,
+        `SELECT id,firstname,middlename,lastname,email FROM accounts`,
         [],
         (err, rows) => {
-            if (err) {
-                return res.send("Database error");
-            }
+
+            if (err) return res.send("Database error");
 
             let html = `
             <h1>Registered Users</h1>
             <table border="1" cellpadding="10">
             <tr>
-                <th>ID</th>
-                <th>First Name</th>
-                <th>Middle Name</th>
-                <th>Last Name</th>
-                <th>Email</th>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Middle</th>
+            <th>Last</th>
+            <th>Email</th>
             </tr>
             `;
 
             rows.forEach(user => {
+
                 html += `
                 <tr>
-                    <td>${user.id}</td>
-                    <td>${user.firstname}</td>
-                    <td>${user.middlename}</td>
-                    <td>${user.lastname}</td>
-                    <td>${user.email}</td>
+                <td>${user.id}</td>
+                <td>${user.firstname}</td>
+                <td>${user.middlename || ""}</td>
+                <td>${user.lastname}</td>
+                <td>${user.email}</td>
                 </tr>
                 `;
+
             });
 
             html += "</table>";
 
             res.send(html);
+
         }
     );
+
 });
 
+/* SERVER */
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, ()=> console.log("Server running on http://localhost:"+PORT));
+
+app.listen(PORT, () => {
+    console.log("Server running on http://localhost:" + PORT);
+});
