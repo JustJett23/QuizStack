@@ -357,72 +357,151 @@ app.get("/quizHistory/:email", (req, res) => {
 /* ADMIN USERS */
 
 app.get("/admin/users", (req, res) => {
-    // Get all accounts first
     db.all(`SELECT * FROM accounts`, [], (err, accounts) => {
         if (err) return res.send("Database error: " + err.message);
 
-        let html = `<h1>Registered Users</h1>`;
+        let html = `
+            <html>
+            <head>
+                <title>Admin Dashboard</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
+                    h1, h2 { color: #333; }
+                    table { border-collapse: collapse; width: 100%; margin-bottom: 30px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+                    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+                    th { background-color: #4CAF50; color: white; }
+                    tr:nth-child(even) { background-color: #f9f9f9; }
+                    tr:hover { background-color: #f1f1f1; }
+                    input[type="text"], input[type="email"], input[type="number"] { width: 90%; padding: 5px; border: 1px solid #ccc; border-radius: 3px; }
+                    button { padding: 5px 10px; border: none; border-radius: 3px; background-color: #4CAF50; color: white; cursor: pointer; margin: 2px; }
+                    button:hover { background-color: #45a049; }
+                    form { display: inline; }
+                    .section { margin-bottom: 50px; }
+                </style>
+            </head>
+            <body>
+        `;
 
-        // Loop through accounts to get their levels and quiz history
-        const accountPromises = accounts.map(user => {
-            return new Promise((resolve) => {
-                // Get unlocked levels for this user
-                db.all(
-                    `SELECT mode, level FROM unlockedLevels WHERE accountId=?`,
-                    [user.id],
-                    (errLevels, levels) => {
-                        if (errLevels) levels = [];
+        html += `<div class="section"><h1>Users</h1>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Middle</th>
+                    <th>Last</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+        `;
 
-                        // Get quiz history for this user
-                        db.all(
-                            `SELECT mode, level, score, date, answer FROM quizHistory WHERE accountId=? ORDER BY id DESC`,
-                            [user.id],
-                            (errQuiz, quiz) => {
-                                if (errQuiz) quiz = [];
-
-                                resolve({
-                                    user,
-                                    levels,
-                                    quiz
-                                });
-                            }
-                        );
-                    }
-                );
-            });
+        accounts.forEach(user => {
+            html += `
+                <tr>
+                    <form method="POST" action="/admin/updateUser">
+                        <td>${user.id}<input type="hidden" name="id" value="${user.id}"></td>
+                        <td><input type="text" name="firstname" value="${user.firstname}"></td>
+                        <td><input type="text" name="middlename" value="${user.middlename || ''}"></td>
+                        <td><input type="text" name="lastname" value="${user.lastname}"></td>
+                        <td><input type="email" name="email" value="${user.email}"></td>
+                        <td>
+                            <button type="submit">Update</button>
+                    </form>
+                            <form method="POST" action="/admin/deleteUser">
+                                <input type="hidden" name="id" value="${user.id}">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                </tr>
+            `;
         });
 
-        // Wait for all promises to complete
-        Promise.all(accountPromises).then(results => {
-            results.forEach(data => {
-                const user = data.user;
+        html += `</table></div>`;
+
+        // Unlocked Levels Section
+        db.all(`SELECT ul.id, ul.accountId, a.email, ul.mode, ul.level 
+                FROM unlockedLevels ul 
+                JOIN accounts a ON ul.accountId = a.id`, [], (err2, levels) => {
+            if (err2) levels = [];
+
+            html += `<div class="section"><h2>Unlocked Levels</h2>
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>User Email</th>
+                        <th>Mode</th>
+                        <th>Level</th>
+                        <th>Actions</th>
+                    </tr>
+            `;
+
+            levels.forEach(lv => {
                 html += `
-                    <h2>${user.firstname} ${user.middlename || ""} ${user.lastname} (ID: ${user.id})</h2>
-                    <p>Email: ${user.email}</p>
-                    <h3>Unlocked Levels</h3>
-                    <table border="1" cellpadding="5">
+                    <tr>
+                        <form method="POST" action="/admin/updateLevel">
+                            <td>${lv.id}<input type="hidden" name="id" value="${lv.id}"></td>
+                            <td>${lv.email}</td>
+                            <td><input type="text" name="mode" value="${lv.mode}"></td>
+                            <td><input type="number" name="level" value="${lv.level}"></td>
+                            <td>
+                                <button type="submit">Update</button>
+                        </form>
+                                <form method="POST" action="/admin/deleteLevel">
+                                    <input type="hidden" name="id" value="${lv.id}">
+                                    <button type="submit">Delete</button>
+                                </form>
+                            </td>
+                    </tr>
+                `;
+            });
+
+            html += `</table></div>`;
+
+            // Quiz History Section
+            db.all(`SELECT qh.id, qh.accountId, a.email, qh.mode, qh.level, qh.score, qh.date, qh.answer 
+                    FROM quizHistory qh 
+                    JOIN accounts a ON qh.accountId = a.id`, [], (err3, quiz) => {
+                if (err3) quiz = [];
+
+                html += `<div class="section"><h2>Quiz History</h2>
+                    <table>
                         <tr>
-                            <th>Mode</th>
-                            <th>Level</th>
-                        </tr>
-                        ${data.levels.map(lv => `<tr><td>${lv.mode}</td><td>${lv.level}</td></tr>`).join('')}
-                    </table>
-                    <h3>Quiz History</h3>
-                    <table border="1" cellpadding="5">
-                        <tr>
+                            <th>ID</th>
+                            <th>User Email</th>
                             <th>Mode</th>
                             <th>Level</th>
                             <th>Score</th>
                             <th>Date</th>
                             <th>Answer</th>
+                            <th>Actions</th>
                         </tr>
-                        ${data.quiz.map(q => `<tr><td>${q.mode}</td><td>${q.level}</td><td>${q.score}</td><td>${q.date}</td><td>${q.answer}</td></tr>`).join('')}
-                    </table>
-                    <hr>
                 `;
-            });
 
-            res.send(html);
+                quiz.forEach(q => {
+                    html += `
+                        <tr>
+                            <form method="POST" action="/admin/updateQuiz">
+                                <td>${q.id}<input type="hidden" name="id" value="${q.id}"></td>
+                                <td>${q.email}</td>
+                                <td><input type="text" name="mode" value="${q.mode}"></td>
+                                <td><input type="number" name="level" value="${q.level}"></td>
+                                <td><input type="text" name="score" value="${q.score}"></td>
+                                <td><input type="text" name="date" value="${q.date}"></td>
+                                <td><input type="text" name="answer" value='${q.answer}'></td>
+                                <td>
+                                    <button type="submit">Update</button>
+                            </form>
+                                    <form method="POST" action="/admin/deleteQuiz">
+                                        <input type="hidden" name="id" value="${q.id}">
+                                        <button type="submit">Delete</button>
+                                    </form>
+                                </td>
+                        </tr>
+                    `;
+                });
+
+                html += `</table></div></body></html>`;
+                res.send(html);
+            });
         });
     });
 });
